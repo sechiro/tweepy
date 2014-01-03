@@ -575,6 +575,64 @@ class API(object):
         require_auth = True
     )
 
+    """ Add users into list by user IDs or screennames """
+    def add_list_members(self, screen_names=[], user_ids=[],
+                owner_screen_name=None, owner_id=None, slug=None, list_id=None):
+        if not isinstance(screen_names, list) or not isinstance(user_ids, list):
+            raise TweepError('screen_names and user_ids must be list object')
+
+        # Note:
+        # Twitter API document says "up to 100 are allowed in a single request."
+        # But request with 100 user IDs or screen names are always failed for over capacity.
+        # So their limit is set to 50.
+        if len(screen_names) > 50 or len(user_ids) > 50:
+            raise TweepError('Length of screen_names or user_ids must be up to 50')
+
+        return self._add_list_members(
+                list_to_csv(screen_names),
+                list_to_csv(user_ids),
+                owner_screen_name = owner_screen_name,
+                owner_id = owner_id,
+                slug = slug,
+                list_id = list_id)
+
+    _add_list_members = bind_api(
+        path = '/lists/members/create_all.json',
+        method = 'POST',
+        payload_type = 'list',
+        allowed_param = ['screen_name', 'user_id', 'owner_screen_name', 'owner_id', 'slug', 'list_id'],
+        require_auth = True
+    )
+
+    """ Remove users from list by user ID or screen_name """
+    def remove_list_members(self, screen_names=[], user_ids=[],
+                owner_screen_name=None, owner_id=None, slug=None, list_id=None):
+        if not isinstance(screen_names, list) or not isinstance(user_ids, list):
+            raise TweepError('screen_names and user_ids must be list object')
+
+        # Note:
+        # Twitter API document says "up to 100 are allowed in a single request."
+        # But request with 100 user IDs or screen names are always failed for over capacity.
+        # So their limit is set to 50.
+        if len(screen_names) > 50 or len(user_ids) > 50:
+            raise TweepError('Length of screen_names or user_ids must be up to 50')
+
+        return self._remove_list_members(
+                list_to_csv(screen_names),
+                list_to_csv(user_ids),
+                owner_screen_name = owner_screen_name,
+                owner_id = owner_id,
+                slug = slug,
+                list_id = list_id)
+
+    _remove_list_members = bind_api(
+        path = '/lists/members/destroy_all.json',
+        method = 'POST',
+        payload_type = 'list',
+        allowed_param = ['screen_name', 'user_id', 'owner_screen_name', 'owner_id', 'slug', 'list_id'],
+        require_auth = True
+    )
+
     list_members = bind_api(
         path = '/lists/members.json',
         payload_type = 'user', payload_list = True,
